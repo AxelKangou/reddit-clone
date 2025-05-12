@@ -9,7 +9,7 @@
         APP_NAME = "reddit-clone-pipeline"
         RELEASE = "1.0.0"
         DOCKER_USER = "axelkangou4791"
-        DOCKER_PASS = "xxx"
+        DOCKER_PASS = "dckr_pat_BmUQQwdTVLc2hiLE_NCT3gcCcE8"
         IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
 
@@ -51,6 +51,19 @@
         stage ('Trivy FS scan') {
             steps {
                 sh "trivy fs . > trivyfs.txt"
+            }
+        }
+        stage ('Build and push Docker image') {
+            steps {
+                script {
+                    docker.withRegistry ('',DOCKER_PASS) {
+                        docker_image = docker.build "${IMAGE_NAME}"
+                    }
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image.push("${IMAGE_TAG}")
+                        docker_image.push('latest')
+                    }
+                }
             }
         }
 
