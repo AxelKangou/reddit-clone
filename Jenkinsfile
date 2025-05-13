@@ -12,6 +12,7 @@
         DOCKER_PASS = "dockerhub"
         IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+        JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
 
     }
 
@@ -81,7 +82,13 @@
                  }
                 }
          } 
-     
+	       stage("Trigger CD Pipeline") {
+            steps {
+                script {
+                    sh "curl -v -k --user clouduser:${JENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'ec2-100-24-62-48.compute-1.amazonaws.com:8080/job/reddit-clone-cd/buildWithParameters?token=gitops-token'"
+                }
+            }
+         }     
 
     }
 
